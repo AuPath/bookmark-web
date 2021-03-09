@@ -54,7 +54,7 @@ For example, if using [[https://github.com/ch11ng/exwm][exwm]] and [[https://www
 * Integration with other packages
 
 ** Consult
-If you are using the [[https://github.com/minad/consult][consult]] pacakge it's possible to add web
+If you are using the [[https://github.com/minad/consult][consult]] package it's possible to add web
 bookmarks to the list of sources for the =consult-buffer= command. This
 makes it extremely handy to quickly open a bookmark.
 
