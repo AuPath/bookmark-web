@@ -88,7 +88,9 @@ they would be shown twice, as normal bookmarks and as web bookmarks):
 * Acknowledgements
 
 Thank you [[https://elmord.org/blog/?entry=20180214-exwm-org-capture][elmord]] for the =elmord-exwm-get-firefox-url= function.
-Thank you [[https://github.com/minad][minad]] and everyone else involved with the amazing [[https://github.com/minad/consult][consult]] package.
+
+Thank you [[https://github.com/minad][minad]] and everyone else involved with the amazing [[https://github.com/minad/consult][consult]]
+package.
 
 * License
 GPLv3
