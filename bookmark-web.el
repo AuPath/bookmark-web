@@ -26,33 +26,42 @@
 
 (require 'bookmark)
 (require 'seq)
-(require 'exwm)
 
 (defgroup bookmark-web nil
   "Bookmark web urls."
   :group 'convenience
   :prefix "bookmark-web")
 
-(defun elmord/exwm-get-firefox-url ()
-  "Copy url of currently selected firefox window."
-  (exwm-input--fake-key ?\C-l)
-  (sleep-for 0.05) ;; Wait a bit for the browser to respond.
-  (exwm-input--fake-key ?\C-c)
-  (sleep-for 0.05)
-  (gui-backend-get-selection 'CLIPBOARD 'STRING))
+(defcustom bookmark-web-get-url-function
+  #'bookmark-web-get-url-empty
+  "Function used to get url of web page.
+Useful to redifine while using exwm or other window managers to
+automate the grabbing of the url from a browser.  This url is
+shown as a suggestion, it is always possible to enter a url
+manually.  This function should return a list."
+  :type 'function)
+
+(defun bookmark-web-get-url-empty ()
+  "By default the url is entered manually."
+  nil)
 
 ;;;###autoload
-(defun bookmark-web-save ()
+(defun bookmark-web-add-bookmark ()
   "Save web url as bookmark."
   (interactive)
-  (let* ((url (completing-read "Url: " (list (elmord/exwm-get-firefox-url))))
+  (let* ((url (completing-read "Url: " (funcall bookmark-web-get-url-function)))
          (bookmark-name (completing-read "Bookmark name: " (list url))))
-    (if (assoc bookmark-name bookmark-alist)
-        (user-error "%s is already bookmarked" bookmark-name)
-      (bookmark-store bookmark-name
-                      (list (cons 'filename url)
-                            (cons 'handler #'bookmark-web-handler))
-                      nil))))
+    (bookmark-web-store url bookmark-name)))
+
+(defun bookmark-web-store (url bookmark-name)
+  "Save web URL as bookmark with BOOKMARK-NAME."
+  (if (assoc bookmark-name bookmark-alist)
+      (user-error "%s is already bookmarked" bookmark-name)
+    (bookmark-store bookmark-name
+                    (list (cons 'filename url)
+                          (cons 'handler #'bookmark-web-handler))
+                    nil)))
+
 ;;;###autoload
 (defun bookmark-web-handler (bm)
   "Handler for web bookmarks, opens bookmark BM with default browser."
