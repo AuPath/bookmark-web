@@ -1,0 +1,94 @@
+#+title: bookmark-web.el - Add web urls as bookmarks
+#+author: Marco Grassi
+
+This package lets you add web urls as bookmarks using the standard
+emacs bookmark interface. These are then opened by the default
+browser.
+
+* Installation
+
+** Manual
+Clone this repo and copy =bookmark-web.el= in the =load-path=, then
+=(require 'bookmark-view)=.
+
+
+** Straight
+#+BEGIN_SRC elisp
+  (use-package bookmark-web
+  :straight '(bookmark-web :host github
+                            :repo "AuPath/bookmark-web"))
+#+END_SRC
+
+
+* Usage
+
+The entry point of this package is the function
+=bookmark-web-add-bookmark=, you will be prompted for a url and a
+bookmark name and then it will be stored using the standard emacs
+bookmark interface.
+
+All standard bookmark function will work on bookmarks added using this
+package.
+
+* Configuration
+By default each time that a web url is added as a bookmark the url has
+to be entered manually.  This behaviour can be altered by defining a
+custom function to supply a url and modifying the variable
+=bookmark-web-get-url-function=. Note that this function must return a
+list to properly work with =completing-read=.
+
+For example, if using [[https://github.com/ch11ng/exwm][exwm]] and [[https://www.mozilla.org/en-US/firefox/new/][Firefox]]:
+
+#+begin_src elisp
+  (defun elmord/exwm-get-firefox-url ()
+    "Copy url of currently selected firefox window."
+    (exwm-input--fake-key ?\C-l)
+    (sleep-for 0.05) ;; Wait a bit for the browser to respond.
+    (exwm-input--fake-key ?\C-c)
+    (sleep-for 0.05)
+    (list (gui-backend-get-selection 'CLIPBOARD 'STRING)))
+
+  (setq bookmark-web-get-url-function #'elmord/exwm-get-firefox-url)
+#+end_src
+
+* Integration with other packages
+
+** Consult
+If you are using the [[https://github.com/minad/consult][consult]] pacakge it's possible to add web
+bookmarks to the list of sources for the =consult-buffer= command. This
+makes it extremely handy to quickly open a bookmark.
+
+#+begin_src elisp
+  (add-to-list 'consult-buffer-sources
+               (list :name     "Web"
+                     :narrow   ?w
+                     :category 'bookmark
+                     :face     'font-lock-keyword-face
+                     :action   #'bookmark-jump
+                     :items    #'bookmark-web-names)
+               'append)
+#+end_src
+
+To hide these bookmarks and only show them as Web bookmarks (otherwise
+they would be shown twice, as normal bookmarks and as web bookmarks):
+
+#+begin_src elisp
+  (setq consult--source-bookmark
+        (plist-put
+         consult--source-bookmark :items
+         (lambda ()
+           (bookmark-maybe-load-default-file)
+           (mapcar #'car
+                   (seq-remove (lambda (x)
+                                 (eq #'bookmark-web-handler
+                                     (alist-get 'handler (cdr x))))
+                               bookmark-alist)))))
+#+end_src
+
+* Acknowledgements
+
+Thank you [[https://elmord.org/blog/?entry=20180214-exwm-org-capture][elmord]] for the =elmord-exwm-get-firefox-url= function.
+Thank you [[https://github.com/minad][minad]] and everyone else involved with the amazing [[https://github.com/minad/consult][consult]] package.
+
+* License
+GPLv3
