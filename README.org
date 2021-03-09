@@ -15,8 +15,8 @@ Clone this repo and copy =bookmark-web.el= in the =load-path=, then
 ** Straight
 #+BEGIN_SRC elisp
   (use-package bookmark-web
-  :straight '(bookmark-web :host github
-                            :repo "AuPath/bookmark-web"))
+    :straight '(bookmark-web :host github
+                             :repo "AuPath/bookmark-web"))
 #+END_SRC
 
 
