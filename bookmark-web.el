@@ -26,16 +26,26 @@
 
 (require 'bookmark)
 (require 'seq)
+(require 'exwm)
 
 (defgroup bookmark-web nil
   "Bookmark web urls."
   :group 'convenience
   :prefix "bookmark-web")
 
+(defun elmord/exwm-get-firefox-url ()
+  "Copy url of currently selected firefox window."
+  (exwm-input--fake-key ?\C-l)
+  (sleep-for 0.05) ;; Wait a bit for the browser to respond.
+  (exwm-input--fake-key ?\C-c)
+  (sleep-for 0.05)
+  (gui-backend-get-selection 'CLIPBOARD 'STRING))
+
+;;;###autoload
 (defun bookmark-web-save ()
   "Save web url as bookmark."
   (interactive)
-  (let* ((url (read-string "Url: "))
+  (let* ((url (completing-read "Url: " (list (elmord/exwm-get-firefox-url))))
          (bookmark-name (completing-read "Bookmark name: " (list url))))
     (if (assoc bookmark-name bookmark-alist)
         (user-error "%s is already bookmarked" bookmark-name)
@@ -43,17 +53,18 @@
                       (list (cons 'filename url)
                             (cons 'handler #'bookmark-web-handler))
                       nil))))
-
+;;;###autoload
 (defun bookmark-web-handler (bm)
   "Handler for web bookmarks, opens bookmark BM with default browser."
   (browse-url (assoc-default 'filename (cdr bm))))
 
+;;;###autoload
 (defun bookmark-web-names ()
   "Return a list of names of all web bookmarks."
   (bookmark-maybe-load-default-file)
   (mapcar #'car (seq-filter (lambda (x) (eq #'bookmark-web-handler
                                             (alist-get 'handler (cdr x))))
                             bookmark-alist)))
-(bookmark-web-names)
+
 (provide 'bookmark-web)
 ;;; bookmark-web.el ends here
